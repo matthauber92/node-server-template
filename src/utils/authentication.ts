@@ -1,70 +1,69 @@
 import {PrismaClient, User} from '@prisma/client'
-import { sign, verify } from 'jsonwebtoken'
-import * as jwt from 'jsonwebtoken'
+import {serialize, parse} from 'cookie'
 
-const SIGNING_KEY = process.env.JWT_SECRET
-const ISSUER = process.env.JWT_ISSUER
-const AUDIENCE = process.env.JWT_AUDIENCE
-const ACCESS_TOKEN_EXPIRES_IN =
-  parseInt(`${process.env.JWT_ACCESS_TOKEN_EXPIRES_IN}`) || 0
-
-export interface JwtPayload extends jwt.JwtPayload {
-  userId: string | undefined
-}
-
-function getJwtPayload(request: Request): JwtPayload | null {
-  const header = request.headers.get('authorization')
-  if (header !== null) {
-    const token = header.split(' ')[1]
-
-    if (SIGNING_KEY) {
-      return verify(token, SIGNING_KEY) as JwtPayload
-    }
-  }
-
-  return null
-}
+const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token'
+const COOKIE_SECRET = process.env.COOKIE_SECRET || 'secretkey'
 
 interface AuthenticateRequestResult {
   user: User | null
-  jwtPayload: JwtPayload | null
+  cookiePayload: { userId: string } | null
 }
 
+// Utility to parse cookies from the request
+function getCookiePayload(request: Request): { userId: string } | null {
+  const cookieHeader = request.headers.get('cookie')
+  if (cookieHeader) {
+    const cookies = parse(cookieHeader)
+    const cookieToken = cookies[COOKIE_NAME]
+    if (cookieToken && COOKIE_SECRET) {
+      try {
+        const payload = JSON.parse(Buffer.from(cookieToken, 'base64').toString('utf-8'))
+        if (payload && payload.userId) {
+          return {userId: payload.userId}
+        }
+      } catch (error) {
+        console.error('Invalid cookie token', error)
+        return null
+      }
+    }
+  }
+  return null
+}
+
+// Middleware for authentication using cookies
 export async function authenticateRequest(
   prisma: PrismaClient,
   request: Request,
 ): Promise<AuthenticateRequestResult> {
-  const jwtPayload = getJwtPayload(request)
-
-  // TODO: try catch? console.error and throw Error vs let it bubble up
+  const cookiePayload = getCookiePayload(request)
+  console.log(cookiePayload, "PAYLOAD")
   const user = await (async () => {
-    if (jwtPayload) {
-      return await prisma.user.findUniqueOrThrow({
-        where: { id: jwtPayload.userId }
-      })
-    } else {
-      return null
+    if (cookiePayload) {
+      try {
+        return await prisma.user.findUniqueOrThrow({
+          where: {id: cookiePayload.userId},
+        })
+      } catch (error) {
+        console.error('User not found', error)
+        return null
+      }
     }
+    return null
   })()
 
-  return { jwtPayload, user }
+  return {user, cookiePayload}
 }
 
-interface SignJwtInput {
-  userId: string
-}
-
-// TODO: test function
-export function signJwt({ userId }: SignJwtInput): string {
-  if (!SIGNING_KEY) {
-    throw new Error('Invalid server configuration')
-  }
-
-  // TODO: namespacing this way might not the best idea
-  return sign({ userId }, SIGNING_KEY, {
-    issuer: ISSUER,
-    subject: userId,
-    audience: AUDIENCE,
-    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-  })
+// Function to clear the authentication cookie (e.g., on logout)
+export function clearAuthCookie(response: Response): void {
+  response.headers.set(
+    'Set-Cookie',
+    serialize(COOKIE_NAME, '', {
+      httpOnly: true,
+      expires: new Date(0), // Expire immediately
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    }),
+  )
 }

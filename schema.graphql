@@ -4,7 +4,6 @@ input AuthenticateInput {
 }
 
 type Authentication {
-  token: String
   userId: String
 }
 
