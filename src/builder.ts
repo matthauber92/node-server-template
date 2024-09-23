@@ -34,7 +34,7 @@ export const builder = new SchemaBuilder<{
     authenticated: GraphQLContext & { jwtPayload: JwtPayload };
   };
 }>({
-  plugins: [PrismaPlugin, ValidationPlugin, ComplexityPlugin],
+  plugins: [ScopeAuthPlugin, PrismaPlugin, ValidationPlugin, ComplexityPlugin],
   scopeAuth: {
     authScopes: async (context) => ({
       authenticated: !!context.jwtPayload,

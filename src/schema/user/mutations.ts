@@ -87,7 +87,7 @@ builder.mutationFields((t) => ({
         }
       },
     }),
-  updateMyUser: t.prismaField({
+  updateMyUser: t.withAuth({loggedIn: true}).prismaField({
     type: 'User',
     args: {
       data: t.arg({
@@ -127,7 +127,7 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  deleteMyUser: t.prismaField({
+  deleteMyUser: t.withAuth({loggedIn: true}).prismaField({
     type: 'User',
     resolve: async (query, _parent, args, context) => {
       // Ensure user is logged in

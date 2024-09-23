@@ -3,12 +3,9 @@ import { prisma } from '../../db';
 import { UserOrderBy, UserFilter, UserWhere } from './inputs';
 
 builder.queryFields((t) => ({
-  myUser: t.prismaField({
+  myUser: t.withAuth({loggedIn: true}).prismaField({
     type: 'User',
     resolve: async (query, _parent, _args, context) => {
-      if (!context.user || !context.user.id) {
-        throw new Error('User must be logged in');
-      }
       return await prisma.user.findUniqueOrThrow({
         ...query,
         where: { id: context.user.id },
@@ -16,7 +13,7 @@ builder.queryFields((t) => ({
     },
   }),
 
-  user: t.prismaField({
+  user: t.withAuth({loggedIn: true}).prismaField({
     type: 'User',
     nullable: true,
     args: {
@@ -26,9 +23,6 @@ builder.queryFields((t) => ({
       }),
     },
     resolve: (query, _parent, args, context) => {
-      if (!context.user) {
-        throw new Error('User must be logged in');
-      }
       return prisma.user.findUnique({
         ...query,
         where: {
@@ -38,7 +32,7 @@ builder.queryFields((t) => ({
     },
   }),
 
-  users: t.prismaField({
+  users: t.withAuth({loggedIn: true}).prismaField({
     type: ['User'],
     args: {
       orderBy: t.arg({ type: [UserOrderBy] }),
@@ -47,9 +41,6 @@ builder.queryFields((t) => ({
       where: t.arg({ type: UserFilter }),
     },
     resolve: (query, _parent, args, context) => {
-      if (!context.user) {
-        throw new Error('User must be logged in');
-      }
       return prisma.user.findMany({
         ...query,
         take: args.take ?? undefined, // Use nullish coalescing
