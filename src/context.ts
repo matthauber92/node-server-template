@@ -1,6 +1,6 @@
-import {YogaInitialContext} from 'graphql-yoga';
-import {authenticateRequest} from './utils/authentication';
-import {prisma} from './db';
+import { YogaInitialContext } from "graphql-yoga";
+import { authenticateRequest } from "./utils/authentication";
+import { prisma } from "./db";
 
 export type GraphQLContext = YogaInitialContext & {
   user: {
@@ -10,9 +10,9 @@ export type GraphQLContext = YogaInitialContext & {
 };
 
 export async function createContext(
-  initialContext: YogaInitialContext & { res: Response }, // Pass res in
+  initialContext: YogaInitialContext & { res: Response },
 ): Promise<GraphQLContext> {
-  const {user} = await authenticateRequest(prisma, initialContext.request);
+  const { user } = await authenticateRequest(prisma, initialContext.request);
 
   return {
     ...initialContext,
