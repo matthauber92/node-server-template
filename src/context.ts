@@ -4,8 +4,7 @@ import { prisma } from './db'
 
 export type GraphQLContext = YogaInitialContext & {
   user: {
-    id: string; // or number, depending on your schema
-    email: string;
+    id: string;
   } | null
   jwtPayload: JwtPayload | null
 }

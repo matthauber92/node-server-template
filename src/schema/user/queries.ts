@@ -1,6 +1,6 @@
-import { builder } from '../../builder';
-import { prisma } from '../../db';
-import { UserOrderBy, UserFilter, UserWhere } from './inputs';
+import {builder} from '../../builder';
+import {prisma} from '../../db';
+import {UserOrderBy, UserFilter, UserWhere} from './inputs';
 
 builder.queryFields((t) => ({
   myUser: t.withAuth({loggedIn: true}).prismaField({
@@ -8,7 +8,7 @@ builder.queryFields((t) => ({
     resolve: async (query, _parent, _args, context) => {
       return await prisma.user.findUniqueOrThrow({
         ...query,
-        where: { id: context.user.id },
+        where: {id: context.user.id},
       });
     },
   }),
@@ -22,7 +22,7 @@ builder.queryFields((t) => ({
         required: true,
       }),
     },
-    resolve: (query, _parent, args, context) => {
+    resolve: (query, _parent, args) => {
       return prisma.user.findUnique({
         ...query,
         where: {
@@ -35,12 +35,12 @@ builder.queryFields((t) => ({
   users: t.withAuth({loggedIn: true}).prismaField({
     type: ['User'],
     args: {
-      orderBy: t.arg({ type: [UserOrderBy] }),
+      orderBy: t.arg({type: [UserOrderBy]}),
       skip: t.arg.int(),
       take: t.arg.int(),
-      where: t.arg({ type: UserFilter }),
+      where: t.arg({type: UserFilter}),
     },
-    resolve: (query, _parent, args, context) => {
+    resolve: (query, _parent, args) => {
       return prisma.user.findMany({
         ...query,
         take: args.take ?? undefined, // Use nullish coalescing

@@ -1,7 +1,7 @@
-import { builder } from '../../builder'
+import {builder} from '../../builder'
 
 builder.prismaObject('User', {
-  authScopes: (parent) => ({
+  authScopes: () => ({
     loggedIn: true
   }),
   fields: (t) => ({
@@ -35,7 +35,7 @@ builder.prismaObject('User', {
   }),
 })
 
-interface Authentication {
+interface IAuthentication {
   token: string
   userId?: string
 }
@@ -44,10 +44,10 @@ interface Authentication {
 // in SchemaBuilder intializer, top level. in other words, at least the interface
 // would need to be imported there and applied
 export const Authentication = builder
-  .objectRef<Authentication>('Authentication')
+  .objectRef<IAuthentication>('Authentication')
   .implement({
     fields: (t) => ({
       token: t.exposeString('token'),
-      userId: t.exposeString('userId', { nullable: true }),
+      userId: t.exposeString('userId', {nullable: true}),
     }),
   })

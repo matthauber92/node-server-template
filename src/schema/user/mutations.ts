@@ -1,47 +1,46 @@
-import { builder } from '../../builder';
-import { prisma } from '../../db';
+import bcrypt from 'bcrypt';
+import {builder} from '../../builder';
+import {prisma} from '../../db';
 import {SignupInput, MyUserUpdate, AuthenticateInput} from './inputs';
-import { Prisma } from '@prisma/client';
-import { GraphQLError } from 'graphql';
+import {Prisma} from '@prisma/client';
+import {GraphQLError} from 'graphql';
 import {Authentication} from "./index";
 import {signJwt} from "../../utils/authentication";
 import {isUserRegistered} from "../../accessControl/user";
 
 builder.mutationFields((t) => ({
   authenticate: t.field({
-    type: Authentication,
+    type: Authentication, // Assuming you have an Authentication type defined
     args: {
       input: t.arg({
-        type: AuthenticateInput,
+        type: AuthenticateInput, // Username and password input
         required: true,
       }),
     },
     resolve: async (_parent, args) => {
+      // Fetch user by username
+      let user = await prisma.user.findUnique({
+        where: {username: args.input.username},
+      });
 
-        let user = await prisma.user.findUnique({
-          where: { username: args.input.username },
-        })
+      if (!user) {
+        throw new GraphQLError('Invalid username or password');
+      }
 
-        if (!user) {
-          user = await prisma.user.create({
-            data: {
-              username: args.input.username,
-              password: args.input.password,
-            }
-          })
-        }
+      // If user exists, verify the provided password matches the stored hash
+      const isPasswordValid = await bcrypt.compare(args.input.password, user.password);
 
-        if (!user) {
-          throw new Error(`Error creating user`)
-        }
+      if (!isPasswordValid) {
+        throw new Error('Invalid username or password');
+      }
 
-        return {
-          token: signJwt({
-            userId: user.id,
-          }),
-          // TODO: consider returning User with Friends with Profile to avoid calling me endpoint
-          userId: isUserRegistered({ target: user }) ? user.id : undefined,
-        }
+      // Create a JWT token if authentication is successful
+      return {
+        token: signJwt({
+          userId: user.id,
+        }),
+        userId: isUserRegistered({target: user}) ? user.id : undefined,
+      };
     },
   }),
   signup: t
@@ -74,7 +73,6 @@ builder.mutationFields((t) => ({
             },
           });
         } catch (err) {
-          console.error(err);
           if (err instanceof Prisma.PrismaClientKnownRequestError) {
             if (err.code === 'P2002') {
               throw new GraphQLError(`Username or email already exists`);
@@ -110,7 +108,7 @@ builder.mutationFields((t) => ({
             firstName: args.data.firstName ?? undefined,
             lastName: args.data.lastName ?? undefined,
           },
-          where: { id: context.user.id },
+          where: {id: context.user.id},
         });
       } catch (err) {
         console.error(err);

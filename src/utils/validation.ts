@@ -1,9 +1,8 @@
-import { z } from 'zod'
+import {z} from 'zod'
 
 const MAX_NAME_LENGTH = 50
 const MIN_USERNAME_LENGTH = 3
 const MAX_USERNAME_LENGTH = 15
-const TOLERANCE = 1e-10 // A small tolerance for precision
 const MAX_FEEDBACK_MESSAGE_LENGTH = 200
 
 const validNamePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ\-']+$/

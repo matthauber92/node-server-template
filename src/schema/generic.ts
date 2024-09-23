@@ -1,12 +1,10 @@
-import { builder } from '../builder'
+import {builder} from '../builder'
 
 const sortOrders = ['asc', 'desc'] as const
 
-type SortOrder = (typeof sortOrders)[number]
-
 const queryModes = ['default', 'insensitive'] as const
 
-type QueryMode = (typeof queryModes)[number]
+type QueryModeType = (typeof queryModes)[number]
 
 export const SortOrder = builder.enumType('SortOrder', {
   values: sortOrders,
@@ -15,7 +13,7 @@ export const QueryMode = builder.enumType('QueryMode', {
   values: queryModes,
 })
 
-export interface StringFilter {
+export interface IStringFilter {
   contains?: string
   startsWith?: string
   endsWith?: string
@@ -26,13 +24,13 @@ export interface StringFilter {
   lte?: string
   in?: string[]
   notIn?: string[]
-  mode?: QueryMode
-  not?: StringFilter
+  mode?: QueryModeType
+  not?: IStringFilter
 }
 
 // must use inputRef passing interface to generic for rucursive inputs
 export const StringFilter = builder
-  .inputRef<StringFilter>('StringFilter')
+  .inputRef<IStringFilter>('StringFilter')
   .implement({
     fields: (t) => ({
       contains: t.string(),
@@ -45,10 +43,10 @@ export const StringFilter = builder
       lt: t.string(),
       lte: t.string(),
 
-      in: t.field({ type: ['String'] }),
-      notIn: t.field({ type: ['String'] }),
+      in: t.field({type: ['String']}),
+      notIn: t.field({type: ['String']}),
 
-      mode: t.field({ type: QueryMode }),
+      mode: t.field({type: QueryMode}),
 
       not: t.field({
         type: StringFilter,
@@ -75,12 +73,12 @@ export const StringFieldUpdateOperations = builder.inputType(
   },
 )
 
-export interface BoolFilter {
+export interface IBoolFilter {
   equals?: boolean
-  not?: BoolFilter
+  not?: IBoolFilter
 }
 
-export const BoolFilter = builder.inputRef<BoolFilter>('BoolFilter').implement({
+export const BoolFilter = builder.inputRef<IBoolFilter>('BoolFilter').implement({
   fields: (t) => ({
     equals: t.boolean(),
 
@@ -99,7 +97,7 @@ export const BoolFieldUpdateOperations = builder.inputType(
   },
 )
 
-export interface FloatFilter {
+export interface IFloatFilter {
   equals?: number
   gt?: number
   gte?: number
@@ -107,11 +105,11 @@ export interface FloatFilter {
   lte?: number
   in?: number[]
   notIn?: number[]
-  not?: FloatFilter
+  not?: IFloatFilter
 }
 
 export const FloatFilter = builder
-  .inputRef<FloatFilter>('FloatFilter')
+  .inputRef<IFloatFilter>('FloatFilter')
   .implement({
     fields: (t) => ({
       equals: t.float(),
@@ -142,7 +140,7 @@ export const FloatFieldUpdateOperations = builder.inputType(
   },
 )
 
-export interface IntFilter {
+export interface IIntFilter {
   equals?: number
   gt?: number
   gte?: number
@@ -150,10 +148,10 @@ export interface IntFilter {
   lte?: number
   in?: number[]
   notIn?: number[]
-  not?: IntFilter
+  not?: IIntFilter
 }
 
-export const IntFilter = builder.inputRef<IntFilter>('IntFilter').implement({
+export const IntFilter = builder.inputRef<IIntFilter>('IntFilter').implement({
   fields: (t) => ({
     equals: t.int(),
     gt: t.int(),
@@ -183,7 +181,7 @@ export const IntFieldUpdateOperations = builder.inputType(
   },
 )
 
-export interface DateTimeFilter {
+export interface IDateTimeFilter {
   equals?: Date
   gt?: Date
   gte?: Date
@@ -191,21 +189,21 @@ export interface DateTimeFilter {
   lte?: Date
   in?: Date[]
   notIn?: Date[]
-  not?: DateTimeFilter
+  not?: IDateTimeFilter
 }
 
 export const DateTimeFilter = builder
-  .inputRef<DateTimeFilter>('DateTimeFilter')
+  .inputRef<IDateTimeFilter>('DateTimeFilter')
   .implement({
     fields: (t) => ({
-      equals: t.field({ type: 'DateTime' }),
-      gt: t.field({ type: 'DateTime' }),
-      gte: t.field({ type: 'DateTime' }),
-      lt: t.field({ type: 'DateTime' }),
-      lte: t.field({ type: 'DateTime' }),
+      equals: t.field({type: 'DateTime'}),
+      gt: t.field({type: 'DateTime'}),
+      gte: t.field({type: 'DateTime'}),
+      lt: t.field({type: 'DateTime'}),
+      lte: t.field({type: 'DateTime'}),
 
-      in: t.field({ type: ['DateTime'] }),
-      notIn: t.field({ type: ['DateTime'] }),
+      in: t.field({type: ['DateTime']}),
+      notIn: t.field({type: ['DateTime']}),
 
       not: t.field({
         type: DateTimeFilter,
@@ -217,7 +215,7 @@ export const DateTimeFieldUpdateOperations = builder.inputType(
   'DateTimeFieldUpdateOperations',
   {
     fields: (t) => ({
-      set: t.field({ type: 'DateTime' }),
+      set: t.field({type: 'DateTime'}),
     }),
   },
 )

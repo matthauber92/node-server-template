@@ -1,10 +1,11 @@
-import { builder } from '../../builder'
+import {builder} from '../../builder'
 
-interface Feedback {
+interface IFeedback {
   message?: string
 }
-export const Feedback = builder.objectRef<Feedback>('Feedback').implement({
+
+export const Feedback = builder.objectRef<IFeedback>('Feedback').implement({
   fields: (t) => ({
-    message: t.exposeString('message', { nullable: true }),
+    message: t.exposeString('message', {nullable: true}),
   }),
 })
