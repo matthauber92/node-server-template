@@ -1,0 +1,199 @@
+input AuthenticateInput {
+  password: String!
+  username: String!
+}
+
+type Authentication {
+  token: String
+  userId: String
+}
+
+input BoolFieldUpdateOperations {
+  set: Boolean
+}
+
+input BoolFilter {
+  equals: Boolean
+  not: BoolFilter
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+input DateTimeFieldUpdateOperations {
+  set: DateTime
+}
+
+input DateTimeFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: DateTimeFilter
+  notIn: [DateTime!]
+}
+
+type Feedback {
+  message: String
+}
+
+input FeedbackInput {
+  message: String!
+}
+
+input FloatFieldUpdateOperations {
+  decrement: Float
+  divide: Float
+  increment: Float
+  multiply: Float
+  set: Float
+}
+
+input FloatFilter {
+  equals: Float
+  gt: Float
+  gte: Float
+  in: [Float!]
+  lt: Float
+  lte: Float
+  not: FloatFilter
+  notIn: [Float!]
+}
+
+input IntFieldUpdateOperations {
+  decrement: Int
+  divide: Int
+  increment: Int
+  multiply: Int
+  set: Int
+}
+
+input IntFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: IntFilter
+  notIn: [Int!]
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input JsonFilter {
+  array_contains: [String!]
+  array_ends_with: [String!]
+  array_starts_with: [String!]
+  equals: String
+  isEmpty: Boolean
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
+}
+
+type Mutation {
+  authenticate(input: AuthenticateInput!): Authentication
+  deleteMyUser: User
+  sendFeedback(input: FeedbackInput!): Feedback
+  signup(input: SignupInput!): User
+  updateMyUser(data: MyUserUpdate!): User
+}
+
+input MyUserUpdate {
+  email: String
+  firstName: String
+  lastName: String
+  username: String
+}
+
+type Query {
+  myUser: User
+  user(where: UserWhere!): User
+  users(orderBy: [UserOrderBy!], skip: Int, take: Int, where: UserFilter): [User!]
+}
+
+enum QueryMode {
+  default
+  insensitive
+}
+
+input SignupInput {
+  email: String
+  firstName: String
+  lastName: String
+  password: String!
+  username: String!
+}
+
+enum SortOrder {
+  asc
+  desc
+}
+
+input StringFieldUpdateOperations {
+  set: String
+}
+
+input StringFilter {
+  contains: String
+  endsWith: String
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  mode: QueryMode
+  not: StringFilter
+  notIn: [String!]
+  startsWith: String
+}
+
+input StringListFilter {
+  equals: [String!]
+  has: String
+  hasEvery: [String!]
+  hasSome: [String!]
+  isEmpty: Boolean
+}
+
+type User {
+  createdAt: DateTime
+  email: String
+  firstName: String
+  id: String
+  lastName: String
+  password: String
+  updatedAt: DateTime
+  username: String
+}
+
+input UserFilter {
+  AND: UserFilter
+  NOT: UserFilter
+  OR: UserFilter
+  id: StringFilter
+}
+
+input UserListFilter {
+  every: UserFilter
+  none: UserFilter
+  some: UserFilter
+}
+
+input UserOrderBy {
+  id: SortOrder
+}
+
+input UserWhere {
+  id: String
+}
