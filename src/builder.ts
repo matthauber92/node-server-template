@@ -1,16 +1,16 @@
-import SchemaBuilder from '@pothos/core';
-import PrismaPlugin from '@pothos/plugin-prisma';
-import type PrismaTypes from '@pothos/plugin-prisma/generated';
-import { DateTimeResolver, JSONResolver } from 'graphql-scalars';
-import { prisma } from './db';
-import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
-import ComplexityPlugin from '@pothos/plugin-complexity';
-import ValidationPlugin from '@pothos/plugin-validation';
-import { GraphQLContext } from './context';
-import { JwtPayload } from './utils/authentication';
-import { GraphQLError } from 'graphql';
-import { pathToArray } from 'graphql/jsutils/Path';
-import {User} from "@prisma/client";
+import SchemaBuilder from "@pothos/core";
+import PrismaPlugin from "@pothos/plugin-prisma";
+import type PrismaTypes from "@pothos/plugin-prisma/generated";
+import { DateTimeResolver, JSONResolver } from "graphql-scalars";
+import { prisma } from "./db";
+import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import ComplexityPlugin from "@pothos/plugin-complexity";
+import ValidationPlugin from "@pothos/plugin-validation";
+import { GraphQLContext } from "./context";
+import { GraphQLError } from "graphql";
+import { pathToArray } from "graphql/jsutils/Path";
+import { User } from "@prisma/client";
+import { getCookiePayload } from "./utils/authentication";
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
@@ -26,18 +26,18 @@ export const builder = new SchemaBuilder<{
   };
   Context: GraphQLContext;
   AuthScopes: {
-    authenticated: boolean
-    loggedIn: boolean
+    authenticated: boolean;
+    loggedIn: boolean;
   };
   AuthContexts: {
     loggedIn: GraphQLContext & { user: User };
-    authenticated: GraphQLContext & { jwtPayload: JwtPayload };
+    authenticated: GraphQLContext;
   };
 }>({
   plugins: [ScopeAuthPlugin, PrismaPlugin, ValidationPlugin, ComplexityPlugin],
   scopeAuth: {
     authScopes: async (context) => ({
-      authenticated: !!context.jwtPayload,
+      authenticated: !!getCookiePayload(context.request),
       loggedIn: (desiredState: boolean) => {
         return !!context.user === desiredState;
       },
@@ -61,7 +61,7 @@ export const builder = new SchemaBuilder<{
       return new GraphQLError(message, {
         path: [...pathToArray(info.path), ...path],
         extensions: {
-          code: 'VALIDATION_ERROR',
+          code: "VALIDATION_ERROR",
         },
       });
     },
@@ -71,5 +71,5 @@ export const builder = new SchemaBuilder<{
 builder.queryType({});
 builder.mutationType({});
 
-builder.addScalarType('DateTime', DateTimeResolver, {});
-builder.addScalarType('JSON', JSONResolver, {});
+builder.addScalarType("DateTime", DateTimeResolver, {});
+builder.addScalarType("JSON", JSONResolver, {});
